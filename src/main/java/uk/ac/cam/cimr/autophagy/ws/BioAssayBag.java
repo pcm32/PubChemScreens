@@ -2,6 +2,7 @@ package uk.ac.cam.cimr.autophagy.ws;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTableEntry;
@@ -24,10 +25,22 @@ public class BioAssayBag {
     private List<PChemBioAssayTable> tables;
     private Multiset<PubChemCompoundIdentifier> activeCIDs = HashMultiset.create();
     private List<PubChemCompoundIdentifier> orderedCIDs;
+    private List<MoleculeInAssayCriterion> criteria;
+    private MoleculeInAssayCriterion orderingCriterion;
 
 
     public BioAssayBag() {
         this.tables = new LinkedList<PChemBioAssayTable>();
+        this.criteria = new LinkedList<MoleculeInAssayCriterion>();
+    }
+
+    /**
+     * Adds criteria to the bioassay bag. Maybe criteria should external to the bioassaybag.
+     *
+     * @param criteria
+     */
+    public void addCriteria(MoleculeInAssayCriterion... criteria) {
+        this.criteria.addAll(Arrays.asList(criteria));
     }
 
     /**
@@ -39,6 +52,10 @@ public class BioAssayBag {
     public void addBioAssayTable(PChemBioAssayTable table) {
         tables.add(table);
         activeCIDs.addAll(table.getActiveCompounds());
+    }
+
+    public List<PChemBioAssayTable> getAssays() {
+        return tables;
     }
 
     /**
@@ -70,6 +87,23 @@ public class BioAssayBag {
             }
         }
         return null;
+    }
+
+    public List<MoleculeInAssayCriterion> getCriteria() {
+        return criteria;
+    }
+
+    public String getCriteriaOutput(MoleculeInAssayCriterion criterion, PubChemCompoundIdentifier cid) {
+        return criterion.getCriterionResult(cid);
+    }
+
+    /**
+     * Within this method, any criterion which requires computation with the complete table can undertake it.
+     */
+    public void compute() {
+        for (MoleculeInAssayCriterion criterion : criteria) {
+            criterion.compute(this);
+        }
     }
 
     private class CompoundRanker implements Comparator<PubChemCompoundIdentifier> {

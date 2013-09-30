@@ -1,5 +1,7 @@
 package uk.ac.cam.cimr.autophagy.exec;
 
+import uk.ac.cam.cimr.autophagy.criteria.PubChemCountActiveMolInAssay;
+import uk.ac.cam.cimr.autophagy.criteria.PubChemIC50uMolBelow;
 import uk.ac.cam.cimr.autophagy.io.BioAssayWriter;
 import uk.ac.cam.cimr.autophagy.io.HighlyActiveCompoundsBioAssayWriter;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
@@ -26,7 +28,10 @@ public class RunPubChemAutophagyRet {
 
     public void run() {
         ScreenRetrieval ret = new ScreenRetrieval();
+        ret.setTestingLimit(30);
         BioAssayBag bag = ret.getAssaysForQuery(query);
+        bag.addCriteria(new PubChemCountActiveMolInAssay(), new PubChemIC50uMolBelow(20.0f));
+        bag.compute();
         writer.write(bag);
     }
 

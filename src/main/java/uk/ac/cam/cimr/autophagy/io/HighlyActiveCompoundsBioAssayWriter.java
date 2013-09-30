@@ -1,6 +1,7 @@
 package uk.ac.cam.cimr.autophagy.io;
 
 import org.apache.log4j.Logger;
+import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
 import uk.ac.ebi.metabolomes.webservices.EUtilsWebServiceConnection;
@@ -9,6 +10,10 @@ import uk.ac.ebi.metabolomes.webservices.eutils.PubChemNamesResult;
 import java.io.*;
 
 /**
+ * Writer for a BioAssayBag. A writer should be more about the format, type of information (list of small molecules,
+ * list of bioassays, etc), or destiny (database, etc). Probably not about a particular criteria fullfilled by small
+ * molecules in a bag.
+ *
  * Created with IntelliJ IDEA.
  * User: pcm32
  * Date: 20/09/13
@@ -31,12 +36,20 @@ public class HighlyActiveCompoundsBioAssayWriter implements BioAssayWriter {
         PubChemNamesResult names = con.getNamesForPubChemCompoundIdentifiers(bag.getOrderedCIDs());
         try {
             BufferedWriter compoundListWriter = new BufferedWriter(new FileWriter(pathToFile));
-            compoundListWriter.write("CID\tSID\tName\tTimesActive\n");
+            compoundListWriter.write("CID\tSID\tName\tTimesActive");
+            for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+                compoundListWriter.write("\t"+criterion.getName());
+            }
+            compoundListWriter.write("\n");
             for(PubChemCompoundIdentifier cid : bag.getOrderedCIDs()) {
                 compoundListWriter.write(cid.getAccession()+"\t"
                         +bag.getSIDForCID(cid)+"\t"
                         +names.getPreferredName(cid.getAccession())+"\t"
-                        +bag.getCIDActiveCount(cid)+"\n");
+                        +bag.getCIDActiveCount(cid));
+                for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+                    compoundListWriter.write("\t"+bag.getCriteriaOutput(criterion,cid));
+                }
+                compoundListWriter.write("\n");
             }
             compoundListWriter.close();
         } catch (IOException e) {

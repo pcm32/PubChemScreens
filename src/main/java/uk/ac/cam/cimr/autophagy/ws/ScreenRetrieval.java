@@ -20,6 +20,18 @@ public class ScreenRetrieval {
 
     private static final Logger LOGGER = Logger.getLogger(ScreenRetrieval.class);
 
+    private Integer testingLimit=0;
+
+    /**
+     * This method is intended only for debugging purposes, to run only on a small number of
+     * assays.
+     *
+     * @param limitOfAssaysToUse
+     */
+    public void setTestingLimit(Integer limitOfAssaysToUse) {
+        testingLimit = limitOfAssaysToUse;
+    }
+
     public BioAssayBag getAssaysForQuery(String termQuery) {
         EUtilsWebServiceConnection eutils = new EUtilsWebServiceConnection();
         Set<String> AIDs = eutils.getPubChemBioAssaysForTermSearch(termQuery);
@@ -45,6 +57,9 @@ public class ScreenRetrieval {
 
             if(++visited % 500 == 0) {
                 System.out.println("Done "+visited+" AIDs\n");
+            }
+            if(testingLimit > 0 && visited > testingLimit) {
+                break;
             }
         }
 

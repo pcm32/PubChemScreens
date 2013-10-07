@@ -2,8 +2,8 @@ package uk.ac.cam.cimr.autophagy.exec;
 
 import uk.ac.cam.cimr.autophagy.criteria.PubChemCountActiveMolInAssay;
 import uk.ac.cam.cimr.autophagy.criteria.PubChemIC50uMolBelow;
-import uk.ac.cam.cimr.autophagy.io.BioAssayWriter;
-import uk.ac.cam.cimr.autophagy.io.HighlyActiveCompoundsBioAssayWriter;
+import uk.ac.cam.cimr.autophagy.io.BioAssayBagWriter;
+import uk.ac.cam.cimr.autophagy.io.HighlyActiveCompoundsBioAssayBagWriter;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.cam.cimr.autophagy.ws.ScreenRetrieval;
 
@@ -19,9 +19,9 @@ import java.io.IOException;
 public class RunPubChemAutophagyRet {
 
     String query;
-    BioAssayWriter writer;
+    BioAssayBagWriter writer;
 
-    public RunPubChemAutophagyRet(String query, BioAssayWriter writer) {
+    public RunPubChemAutophagyRet(String query, BioAssayBagWriter writer) {
         this.query = query;
         this.writer = writer;
     }
@@ -38,7 +38,7 @@ public class RunPubChemAutophagyRet {
 
     public static void main(String[] args) throws IOException {
         String path = "/tmp/";
-        BioAssayWriter writer = new HighlyActiveCompoundsBioAssayWriter(path);
+        BioAssayBagWriter writer = new HighlyActiveCompoundsBioAssayBagWriter(path);
 
         RunPubChemAutophagyRet runner = new RunPubChemAutophagyRet("autophagy",writer);
 

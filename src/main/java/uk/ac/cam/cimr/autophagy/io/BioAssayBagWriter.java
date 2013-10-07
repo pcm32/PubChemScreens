@@ -9,7 +9,7 @@ import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
  * Time: 13:37
  * To change this template use File | Settings | File Templates.
  */
-public interface BioAssayWriter {
+public interface BioAssayBagWriter {
 
     public void write(BioAssayBag bag);
     public void close();

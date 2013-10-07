@@ -20,13 +20,13 @@ import java.io.*;
  * Time: 13:40
  * To change this template use File | Settings | File Templates.
  */
-public class HighlyActiveCompoundsBioAssayWriter implements BioAssayWriter {
+public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter {
 
-    private static final Logger LOGGER = Logger.getLogger(HighlyActiveCompoundsBioAssayWriter.class);
+    private static final Logger LOGGER = Logger.getLogger(HighlyActiveCompoundsBioAssayBagWriter.class);
 
     String pathToFile;
 
-    public HighlyActiveCompoundsBioAssayWriter(String path) throws IOException {
+    public HighlyActiveCompoundsBioAssayBagWriter(String path) throws IOException {
         pathToFile = path + File.separator + "compounds.txt";
     }
 

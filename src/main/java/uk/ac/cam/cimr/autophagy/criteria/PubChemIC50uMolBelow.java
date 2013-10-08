@@ -1,5 +1,6 @@
 package uk.ac.cam.cimr.autophagy.criteria;
 
+import org.apache.log4j.Logger;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.mdk.domain.identifier.AbstractChemicalIdentifier;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
@@ -18,6 +19,7 @@ import java.util.Map;
  */
 public class PubChemIC50uMolBelow extends AbstractCountableCriterion implements MoleculeInAssayCriterion {
 
+    private static final Logger LOGGER = Logger.getLogger(PubChemIC50uMolBelow.class);
 
     private Float microMolarThreshold;
     private Integer currentIndex;
@@ -62,7 +64,12 @@ public class PubChemIC50uMolBelow extends AbstractCountableCriterion implements 
     }
 
     private Float getIC50Value(PChemBioAssayTableEntry entry, Integer index) {
-        Float ic50 = Float.parseFloat(entry.getAdditionalField(index));
-        return ic50;
+        try {
+            Float ic50 = Float.parseFloat(entry.getAdditionalField(index));
+            return ic50;
+        } catch (NumberFormatException e) {
+            LOGGER.error("Problems transforming "+entry.getAdditionalField(index)+" into a float for IC50 for "+entry.getCID(),e);
+        }
+        return Float.NaN;
     }
 }

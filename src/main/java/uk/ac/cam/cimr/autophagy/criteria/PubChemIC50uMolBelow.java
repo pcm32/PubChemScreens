@@ -16,16 +16,16 @@ import java.util.Map;
  * Time: 16:37
  * To change this template use File | Settings | File Templates.
  */
-public class PubChemIC50uMolBelow implements MoleculeInAssayCriterion {
+public class PubChemIC50uMolBelow extends AbstractCountableCriterion implements MoleculeInAssayCriterion {
 
 
     private Float microMolarThreshold;
-    private Map<PubChemCompoundIdentifier,Integer> countBelowThres;
+    private Integer currentIndex;
 
 
     public PubChemIC50uMolBelow(Float microMolarThreshold) {
+        super();
         this.microMolarThreshold = microMolarThreshold;
-        this.countBelowThres = new HashMap<PubChemCompoundIdentifier, Integer>();
     }
 
     @Override
@@ -35,25 +35,30 @@ public class PubChemIC50uMolBelow implements MoleculeInAssayCriterion {
 
     @Override
     public String getCriterionResult(AbstractChemicalIdentifier cid) {
-        return countBelowThres.get(cid)+"";
+        if(countPositives.containsKey(cid))
+            return countPositives.get(cid)+"";
+        else
+            return null;
     }
 
     @Override
-    public void compute(BioAssayBag bioAssayBag) {
-        for (PChemBioAssayTable assay : bioAssayBag.getAssays()) {
-            Integer index = assay.getAdditionalFieldIndex("IC50");
-            if(index > -1) {
-                for (PChemBioAssayTableEntry entry : assay.getEntries()) {
-                    Float ic50 = getIC50Value(entry, index);
-                    if(ic50 != null && !ic50.isNaN() && !ic50.isInfinite() && ic50 <= microMolarThreshold ) {
-                        Integer currentCount =
-                                countBelowThres.containsKey(entry.getPChemCompoundIdentifier())
-                        ? countBelowThres.get(entry.getPChemCompoundIdentifier())+1 : 1;
-                        countBelowThres.put(entry.getPChemCompoundIdentifier(),currentCount);
-                    }
-                }
-            }
-        }
+    void registerPositiveCase(PChemBioAssayTableEntry entry) {
+        Integer currentCount =
+                countPositives.containsKey(entry.getPChemCompoundIdentifier())
+        ? countPositives.get(entry.getPChemCompoundIdentifier())+1 : 1;
+        countPositives.put(entry.getPChemCompoundIdentifier(), currentCount);
+    }
+
+    @Override
+    boolean criteriaAvailable(BioAssayBag bag, PChemBioAssayTable assay) {
+        currentIndex = assay.getAdditionalFieldIndex("IC50");
+        return currentIndex > -1;
+    }
+
+    @Override
+    boolean criteriaApproved(BioAssayBag bag, PChemBioAssayTable assay, PChemBioAssayTableEntry entry) {
+        Float ic50 = getIC50Value(entry, currentIndex);
+        return ic50 != null && !ic50.isNaN() && !ic50.isInfinite() && ic50 <= microMolarThreshold;
     }
 
     private Float getIC50Value(PChemBioAssayTableEntry entry, Integer index) {

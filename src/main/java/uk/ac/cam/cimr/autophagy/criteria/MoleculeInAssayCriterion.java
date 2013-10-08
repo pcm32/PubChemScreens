@@ -3,6 +3,7 @@ package uk.ac.cam.cimr.autophagy.criteria;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.mdk.domain.identifier.AbstractChemicalIdentifier;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
+import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 
 /**
  * Ths interface describes the idea of a criteria relevant to a Molecule participating in an assay. A criteria should be
@@ -40,4 +41,15 @@ public interface MoleculeInAssayCriterion {
      * @param bioAssayBag
      */
     public void compute(BioAssayBag bioAssayBag);
+
+
+    /**
+     * Indicates whether a particular small molecule (represented by a chemical identifier) approves this criterion within
+     * a particular assay.
+     *
+     * @param assay
+     * @param chemicalIdentifier
+     * @return true or false if the criterions is approved; null if not applicable.
+     */
+    public Boolean getCriterionResult(PChemBioAssayTable assay, AbstractChemicalIdentifier chemicalIdentifier);
 }

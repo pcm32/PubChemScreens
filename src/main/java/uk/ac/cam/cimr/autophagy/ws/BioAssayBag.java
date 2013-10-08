@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
+import uk.ac.ebi.metabolomes.webservices.eutils.PubChemNamesResult;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTableEntry;
 
@@ -27,6 +28,7 @@ public class BioAssayBag {
     private List<PubChemCompoundIdentifier> orderedCIDs;
     private List<MoleculeInAssayCriterion> criteria;
     private MoleculeInAssayCriterion orderingCriterion;
+    private PubChemNamesResult compoundNames;
 
 
     public BioAssayBag() {
@@ -89,12 +91,23 @@ public class BioAssayBag {
         return null;
     }
 
+    public String getNameForCID(PubChemCompoundIdentifier cid) {
+        if(compoundNames.getCompoundIds().contains(cid.getAccession())) {
+            return compoundNames.getPreferredName(cid.getAccession());
+        }
+        return "Not found";
+    }
+
     public List<MoleculeInAssayCriterion> getCriteria() {
         return criteria;
     }
 
     public String getCriteriaOutput(MoleculeInAssayCriterion criterion, PubChemCompoundIdentifier cid) {
         return criterion.getCriterionResult(cid);
+    }
+
+    public Boolean getCriteriaOutput(MoleculeInAssayCriterion criterion, PChemBioAssayTable assay, PubChemCompoundIdentifier cid) {
+        return criterion.getCriterionResult(assay, cid);
     }
 
     /**
@@ -104,6 +117,14 @@ public class BioAssayBag {
         for (MoleculeInAssayCriterion criterion : criteria) {
             criterion.compute(this);
         }
+    }
+
+    public void setCompoundNames(PubChemNamesResult compoundNames) {
+        this.compoundNames = compoundNames;
+    }
+
+    public PubChemNamesResult getCompoundNames() {
+        return compoundNames;
     }
 
     private class CompoundRanker implements Comparator<PubChemCompoundIdentifier> {

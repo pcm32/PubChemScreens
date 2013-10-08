@@ -47,7 +47,9 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
                         +names.getPreferredName(cid.getAccession())+"\t"
                         +bag.getCIDActiveCount(cid));
                 for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
-                    compoundListWriter.write("\t"+bag.getCriteriaOutput(criterion,cid));
+                    String outcome =
+                            bag.getCriteriaOutput(criterion,cid) != null ? bag.getCriteriaOutput(criterion,cid) : "N/A";
+                    compoundListWriter.write("\t"+outcome);
                 }
                 compoundListWriter.write("\n");
             }

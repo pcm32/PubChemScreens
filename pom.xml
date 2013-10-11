@@ -16,5 +16,30 @@
         </dependency>
     </dependencies>
 
+    <repositories>
+        <repository>
+            <id>maven-repo</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>ebi-repo</id>
+            <name>EBI maven repository</name>
+            <url>http://www.ebi.ac.uk/~maven/m2repo</url>
+        </repository>
+        <repository>
+            <id>ebi-repo-snapshots</id>
+            <name>EBI maven snapshots repository</name>
+            <url>http://www.ebi.ac.uk/~maven/m2repo_snapshots</url>
+        </repository>
+        <repository>
+            <id>cimr-repo-snapshots</id>
+            <url>http://germanic/mvn_snapshots</url>
+        </repository>
+        <repository>
+            <id>cimr-repo</id>
+            <url>http://germanic/mvn</url>
+        </repository>
+    </repositories>
+
     
 </project>

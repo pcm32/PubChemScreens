@@ -13,6 +13,12 @@
             <groupId>uk.ac.ebi.mdk</groupId>
             <artifactId>warehouse-core</artifactId>
             <version>1.4.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jchem</artifactId>
+                    <groupId>chemaxon</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

@@ -12,6 +12,7 @@ import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.cam.cimr.autophagy.ws.ScreenRetrieval;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -64,7 +65,11 @@ public class RunPubChemAutophagyRet {
 
     public static void main(String[] args) throws IOException {
         String path = args[0];
-        Files.createDirectory(FileSystems.getDefault().getPath(path));
+        try {
+            Files.createDirectory(FileSystems.getDefault().getPath(path));
+        } catch (FileAlreadyExistsException e) {
+            
+        }
         BioAssayBagWriter highlyActiveCompoundsBioAssayBagWriter = new HighlyActiveCompoundsBioAssayBagWriter(path);
         BioAssayBagWriter bioAssaySummaryWriter = new BAssayBagAssaySummaryWriter(path);
         BioAssayBagWriter comp2AssayWriter = new Compound2BioAssayWriter(path);

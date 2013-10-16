@@ -21,6 +21,7 @@ public class ScreenRetrieval {
     private static final Logger LOGGER = Logger.getLogger(ScreenRetrieval.class);
 
     private Integer testingLimit=0;
+    private List<BioAssayFilter> bioAssayFilters = new LinkedList<BioAssayFilter>();
 
     /**
      * This method is intended only for debugging purposes, to run only on a small number of
@@ -32,15 +33,36 @@ public class ScreenRetrieval {
         testingLimit = limitOfAssaysToUse;
     }
 
+    /**
+     * Sets the BioAssayFilters to be used to filter the resulting list of AIDs that will be produced by the query.
+     * This operation removes any previous set filters added, and needs to be called before
+     * {@link #getAssaysForQuery(String)}.
+     *
+     * @param filters the filters to add.
+     */
+    public void setBioAssayFilters(BioAssayFilter... filters) {
+        this.bioAssayFilters.clear();
+        this.bioAssayFilters.addAll(Arrays.asList(filters));
+    }
+
+    /**
+     * Obtains a BioAssayBag that contains the BioAssays produced by this term query.
+     *
+     * @param termQuery use to search the Assay data set.
+     * @return a BioAssayBag holding all the Assays resulting from the search.
+     */
     public BioAssayBag getAssaysForQuery(String termQuery) {
         EUtilsWebServiceConnection eutils = new EUtilsWebServiceConnection();
         Set<String> AIDs = eutils.getPubChemBioAssaysForTermSearch(termQuery);
+
+        for (BioAssayFilter filter : bioAssayFilters) {
+            AIDs = filter.filterAssays(AIDs);
+        }
 
         PubChemPUGRESTWebService pug = new PubChemPUGRESTWebService();
 
         BioAssayBag bag = new BioAssayBag();
         int visited = 0;
-        int active = 0;
         for (String aid : AIDs) {
 
             try {
@@ -49,7 +71,6 @@ public class ScreenRetrieval {
 
                 if(table.getActiveCompounds().size()>0) {
                     System.out.println("AID has "+table.getActiveCompounds().size()+" active compounds");
-                    active += table.getActiveCompounds().size();
                 }
             } catch (RuntimeException e) {
                 LOGGER.error("Problems for AID "+aid,e);

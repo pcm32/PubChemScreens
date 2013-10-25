@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>uk.ac.ebi.cheminformatics.ncbiwebservices</groupId>
-            <artifactId>Eutils</artifactId>
+            <artifactId>EUtils</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

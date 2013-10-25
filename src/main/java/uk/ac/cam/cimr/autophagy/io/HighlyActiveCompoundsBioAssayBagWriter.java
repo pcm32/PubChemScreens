@@ -26,6 +26,12 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
 
     String pathToFile;
 
+    /**
+     * Initializes the writer with a path, where the compounds.txt file will be created.
+     *
+     * @param path where the compounds.txt file will be created.
+     * @throws IOException
+     */
     public HighlyActiveCompoundsBioAssayBagWriter(String path) throws IOException {
         pathToFile = path + File.separator + "compounds.txt";
     }

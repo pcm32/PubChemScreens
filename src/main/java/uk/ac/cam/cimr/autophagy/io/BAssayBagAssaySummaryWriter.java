@@ -1,6 +1,8 @@
 package uk.ac.cam.cimr.autophagy.io;
 
 import org.apache.log4j.Logger;
+import uk.ac.cam.cimr.autophagy.criteria.BioAssayCriterion;
+import uk.ac.cam.cimr.autophagy.criteria.Criterion;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 
@@ -8,9 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,19 +35,44 @@ public class BAssayBagAssaySummaryWriter implements BioAssayBagWriter {
             BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile));
             List<PChemBioAssayTable> assays = bag.getAssays();
             Collections.sort(assays,new AssayTableSorterByActiveCount());
-            writer.write("ID\tTitle\tDescription\tActiveComp\tTotalComp\n");
+            Collection<BioAssayCriterion> criteria = filter(bag.getCriteria());
+            writer.write("ID\tTitle\tDescription\tActiveComp\tTotalComp");
+            for (BioAssayCriterion criterion : criteria) {
+                writer.write("\t"+criterion.getName());
+            }
+            writer.write("\n");
             for (PChemBioAssayTable table : assays) {
                 StringBuilder builder = new StringBuilder(table.getID());
                 builder.append("\t").append(table.getName())
                         .append("\t'").append(table.getDescription())
                         .append("\t").append(table.getActiveCompounds().size())
-                        .append("\t").append(table.getEntryCount()).append("\n");
+                        .append("\t").append(table.getEntryCount());
+                for (BioAssayCriterion criterion : criteria) {
+                    builder.append("\t").append(bag.getCriteriaOutput(criterion,table));
+                }
+                builder.append("\n");
                 writer.write(builder.toString());
             }
             writer.close();
         } catch (IOException e) {
             LOGGER.error("Could not write compounds file", e);
         }
+    }
+
+    /**
+     * Filters the set of criteria given to those that this writer can handle.
+     * TODO We need a better place to have this method.
+     *
+     * @param criteria
+     * @return
+     */
+    private Collection<BioAssayCriterion> filter(Collection<Criterion> criteria) {
+        LinkedList<BioAssayCriterion> res = new LinkedList<BioAssayCriterion>();
+        for (Criterion criterion : criteria) {
+            if (criterion instanceof BioAssayCriterion)
+                res.add((BioAssayCriterion)criterion);
+        }
+        return res;
     }
 
     @Override

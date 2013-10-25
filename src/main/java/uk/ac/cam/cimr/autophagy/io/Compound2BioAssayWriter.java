@@ -1,6 +1,7 @@
 package uk.ac.cam.cimr.autophagy.io;
 
 import org.apache.log4j.Logger;
+import uk.ac.cam.cimr.autophagy.criteria.Criterion;
 import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
@@ -10,6 +11,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Writes a Compound to BioAssay list, where each row represents a compound to bio assay assigmnet.
@@ -34,8 +38,9 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
     public void write(BioAssayBag bag) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile));
+            Collection<MoleculeInAssayCriterion> suitableCriteria = filterCriteria(bag.getCriteria());
             writer.write("CID\tCompoundName\tAID\tAssayTitle\tAssayDescription");
-            for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+            for (MoleculeInAssayCriterion criterion : suitableCriteria) {
                 writer.write("\t"+criterion.getName());
             }
             writer.write("\n");
@@ -44,7 +49,7 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
                 for (PChemBioAssayTableEntry entry : assay.getEntries()) {
                     writer.write(entry.getCID()+"\t"+bag.getNameForCID(entry.getPChemCompoundIdentifier())+"\t"+assay.getID()+"\t"+assay.getName()+"\t"+assay.getDescription());
 
-                    for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+                    for (MoleculeInAssayCriterion criterion : suitableCriteria) {
                         Boolean outcome = bag.getCriteriaOutput(criterion, assay, entry.getPChemCompoundIdentifier());
                         String outcomeStr = outcome != null ? outcome.toString() : "N/A";
                         writer.write("\t"+outcomeStr);
@@ -57,6 +62,15 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
             LOGGER.error("Could not write compounds file", e);
         }
 
+    }
+
+    private Collection<MoleculeInAssayCriterion> filterCriteria(Collection<Criterion> criteria) {
+        LinkedList<MoleculeInAssayCriterion> res = new LinkedList<MoleculeInAssayCriterion>();
+        for (Criterion criterion : criteria) {
+            if(criterion instanceof MoleculeInAssayCriterion)
+                res.add((MoleculeInAssayCriterion)criterion);
+        }
+        return res;
     }
 
     @Override

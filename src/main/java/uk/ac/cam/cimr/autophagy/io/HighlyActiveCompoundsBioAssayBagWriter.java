@@ -36,7 +36,7 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
         PubChemNamesResult names = con.getNamesForPubChemCompoundIdentifiers(bag.getOrderedCIDs());
         try {
             BufferedWriter compoundListWriter = new BufferedWriter(new FileWriter(pathToFile));
-            compoundListWriter.write("CID\tSID\tName\tTimesActive");
+            compoundListWriter.write("CID\tSID\tName");
             for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
                 compoundListWriter.write("\t"+criterion.getName());
             }
@@ -44,8 +44,7 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
             for(PubChemCompoundIdentifier cid : bag.getOrderedCIDs()) {
                 compoundListWriter.write(cid.getAccession()+"\t"
                         +bag.getSIDForCID(cid)+"\t"
-                        +names.getPreferredName(cid.getAccession())+"\t"
-                        +bag.getCIDActiveCount(cid));
+                        +names.getPreferredName(cid.getAccession()));
                 for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
                     String outcome =
                             bag.getCriteriaOutput(criterion,cid) != null ? bag.getCriteriaOutput(criterion,cid) : "N/A";

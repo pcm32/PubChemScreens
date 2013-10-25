@@ -43,7 +43,7 @@ public class BioAssayBag {
      *
      * @param criteria
      */
-    public void addCriteria(MoleculeInAssayCriterion... criteria) {
+    public void addCriteria(Criterion... criteria) {
         this.criteria.addAll(Arrays.asList(criteria));
     }
 

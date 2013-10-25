@@ -1,12 +1,15 @@
 package uk.ac.cam.cimr.autophagy.exec;
 
 import org.apache.log4j.Logger;
+import uk.ac.cam.cimr.autophagy.criteria.BioAssayKeywordScoreCriterion;
 import uk.ac.cam.cimr.autophagy.criteria.PubChemCountActiveMolInAssay;
 import uk.ac.cam.cimr.autophagy.criteria.PubChemIC50uMolBelow;
 import uk.ac.cam.cimr.autophagy.io.BAssayBagAssaySummaryWriter;
 import uk.ac.cam.cimr.autophagy.io.BioAssayBagWriter;
 import uk.ac.cam.cimr.autophagy.io.Compound2BioAssayWriter;
 import uk.ac.cam.cimr.autophagy.io.HighlyActiveCompoundsBioAssayBagWriter;
+import uk.ac.cam.cimr.autophagy.scoring.BioAssayScorer;
+import uk.ac.cam.cimr.autophagy.scoring.SimpleDictionaryBasedAssayScorer;
 import uk.ac.cam.cimr.autophagy.ws.*;
 
 import java.io.File;
@@ -45,13 +48,14 @@ public class RunPubChemAutophagyRet {
 
     public void run() {
         ScreenRetrieval ret = new ScreenRetrieval();
+        BioAssayScorer scorer = new SimpleDictionaryBasedAssayScorer(SimpleDictionaryBasedAssayScorer.class.getResourceAsStream("keywords.txt"));
         if(testingLimit>0)
             ret.setTestingLimit(testingLimit);
         if(filters!=null && filters.length>0)
             ret.setBioAssayFilters(filters);
         BioAssayBag bag = ret.getAssaysForQuery(query);
         LOGGER.info("Retrieved bag with "+bag.getAssays().size()+" assays");
-        bag.addCriteria(new PubChemCountActiveMolInAssay(), new PubChemIC50uMolBelow(20.0f));
+        bag.addCriteria(new PubChemCountActiveMolInAssay(), new PubChemIC50uMolBelow(20.0f), new BioAssayKeywordScoreCriterion(scorer));
         BioAssayAnnotator annotator = new BioAssayAnnotator();
         annotator.annotate(bag);
         LOGGER.info("Annotated the bag.");

@@ -1,6 +1,7 @@
 package uk.ac.cam.cimr.autophagy.io;
 
 import org.apache.log4j.Logger;
+import uk.ac.cam.cimr.autophagy.criteria.Criterion;
 import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.cam.cimr.autophagy.ws.BioAssayBag;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
@@ -8,6 +9,8 @@ import uk.ac.ebi.metabolomes.webservices.EUtilsWebServiceConnection;
 import uk.ac.ebi.metabolomes.webservices.eutils.PubChemNamesResult;
 
 import java.io.*;
+import java.util.Collection;
+import java.util.LinkedList;
 
 /**
  * Writer for a BioAssayBag. A writer should be more about the format, type of information (list of small molecules,
@@ -40,10 +43,11 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
     public void write(BioAssayBag bag) {
         EUtilsWebServiceConnection con = new EUtilsWebServiceConnection();
         PubChemNamesResult names = con.getNamesForPubChemCompoundIdentifiers(bag.getOrderedCIDs());
+        Collection<MoleculeInAssayCriterion> criteria = filterCriteria(bag.getCriteria());
         try {
             BufferedWriter compoundListWriter = new BufferedWriter(new FileWriter(pathToFile));
             compoundListWriter.write("CID\tSID\tName");
-            for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+            for (MoleculeInAssayCriterion criterion : criteria) {
                 compoundListWriter.write("\t"+criterion.getName());
             }
             compoundListWriter.write("\n");
@@ -51,7 +55,7 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
                 compoundListWriter.write(cid.getAccession()+"\t"
                         +bag.getSIDForCID(cid)+"\t"
                         +names.getPreferredName(cid.getAccession()));
-                for (MoleculeInAssayCriterion criterion : bag.getCriteria()) {
+                for (MoleculeInAssayCriterion criterion : criteria) {
                     String outcome =
                             bag.getCriteriaOutput(criterion,cid) != null ? bag.getCriteriaOutput(criterion,cid) : "N/A";
                     compoundListWriter.write("\t"+outcome);
@@ -62,6 +66,15 @@ public class HighlyActiveCompoundsBioAssayBagWriter implements BioAssayBagWriter
         } catch (IOException e) {
             LOGGER.error("Could not write compounds file",e);
         }
+    }
+
+    private Collection<MoleculeInAssayCriterion> filterCriteria(Collection<Criterion> criteria) {
+        LinkedList<MoleculeInAssayCriterion> res = new LinkedList<MoleculeInAssayCriterion>();
+        for (Criterion criterion : criteria) {
+            if(criterion instanceof MoleculeInAssayCriterion)
+                res.add((MoleculeInAssayCriterion)criterion);
+        }
+        return res;
     }
 
     @Override

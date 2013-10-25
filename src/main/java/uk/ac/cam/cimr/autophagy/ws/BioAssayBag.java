@@ -2,6 +2,7 @@ package uk.ac.cam.cimr.autophagy.ws;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import uk.ac.cam.cimr.autophagy.criteria.Criterion;
 import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
 import uk.ac.ebi.metabolomes.webservices.eutils.PubChemNamesResult;
@@ -26,14 +27,14 @@ public class BioAssayBag {
     private List<PChemBioAssayTable> tables;
     private Multiset<PubChemCompoundIdentifier> activeCIDs = HashMultiset.create();
     private List<PubChemCompoundIdentifier> orderedCIDs;
-    private List<MoleculeInAssayCriterion> criteria;
+    private List<Criterion> criteria;
     private MoleculeInAssayCriterion orderingCriterion;
     private PubChemNamesResult compoundNames;
 
 
     public BioAssayBag() {
         this.tables = new LinkedList<PChemBioAssayTable>();
-        this.criteria = new LinkedList<MoleculeInAssayCriterion>();
+        this.criteria = new LinkedList<Criterion>();
     }
 
     /**
@@ -98,7 +99,7 @@ public class BioAssayBag {
         return "Not found";
     }
 
-    public List<MoleculeInAssayCriterion> getCriteria() {
+    public List<Criterion> getCriteria() {
         return criteria;
     }
 
@@ -114,7 +115,7 @@ public class BioAssayBag {
      * Within this method, any criterion which requires computation with the complete table can undertake it.
      */
     public void compute() {
-        for (MoleculeInAssayCriterion criterion : criteria) {
+        for (Criterion criterion : criteria) {
             criterion.compute(this);
         }
     }

@@ -5,6 +5,8 @@ import uk.ac.ebi.mdk.domain.identifier.AbstractChemicalIdentifier;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 
+import java.util.Collection;
+
 /**
  * Ths interface describes the idea of a criteria relevant to a Molecule participating in an assay. A criteria should be
  * able to describe itself (so that it can be written to a file), be able to say whether it is sortable or not, and be able

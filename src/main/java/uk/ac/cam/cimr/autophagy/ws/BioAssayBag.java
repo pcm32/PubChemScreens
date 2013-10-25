@@ -2,6 +2,7 @@ package uk.ac.cam.cimr.autophagy.ws;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
+import uk.ac.cam.cimr.autophagy.criteria.BioAssayCriterion;
 import uk.ac.cam.cimr.autophagy.criteria.Criterion;
 import uk.ac.cam.cimr.autophagy.criteria.MoleculeInAssayCriterion;
 import uk.ac.ebi.mdk.domain.identifier.PubChemCompoundIdentifier;
@@ -109,6 +110,10 @@ public class BioAssayBag {
 
     public Boolean getCriteriaOutput(MoleculeInAssayCriterion criterion, PChemBioAssayTable assay, PubChemCompoundIdentifier cid) {
         return criterion.getCriterionResult(assay, cid);
+    }
+
+    public String getCriteriaOutput(BioAssayCriterion criterion, PChemBioAssayTable assay) {
+        return criterion.getCriterionResult(assay);
     }
 
     /**

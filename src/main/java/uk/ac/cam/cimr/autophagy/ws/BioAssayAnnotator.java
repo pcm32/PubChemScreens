@@ -26,6 +26,8 @@ public class BioAssayAnnotator {
 
     private EUtilsWebServiceConnection connection;
 
+    private final Integer assayStep = 1000;
+
     public BioAssayAnnotator() {
         this.connection = new EUtilsWebServiceConnection();
     }
@@ -37,8 +39,8 @@ public class BioAssayAnnotator {
      */
     public void annotate(BioAssayBag bag) {
         List<PChemBioAssayTable> assays = bag.getAssays();
-        for (int from = 0; from < assays.size(); from+=5000) {
-            int to = from + 200 - 1 > assays.size() ? assays.size() - 1 : from + 200 - 1;
+        for (int from = 0; from < assays.size(); from+=assayStep) {
+            int to = from + assayStep - 1 > assays.size() ? assays.size() - 1 : from + assayStep - 1;
 
             List<String> aids = new ArrayList<String>(to - from + 1);
 

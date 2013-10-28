@@ -68,7 +68,7 @@ public class PubChemIC50uMolBelow extends AbstractCountableCriterion implements 
             Float ic50 = Float.parseFloat(entry.getAdditionalField(index));
             return ic50;
         } catch (NumberFormatException e) {
-            LOGGER.error("Problems transforming "+entry.getAdditionalField(index)+" into a float for IC50 for "+entry.getCID(),e);
+            LOGGER.error("Problems transforming "+entry.getAdditionalField(index)+" into a float for IC50 for CID "+entry.getCID());
         }
         return Float.NaN;
     }

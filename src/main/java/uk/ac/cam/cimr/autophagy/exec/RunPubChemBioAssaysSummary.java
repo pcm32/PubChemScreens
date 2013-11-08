@@ -1,6 +1,8 @@
 package uk.ac.cam.cimr.autophagy.exec;
 
 import org.apache.log4j.Logger;
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 import uk.ac.cam.cimr.autophagy.criteria.BioAssayKeywordScoreCriterion;
 import uk.ac.cam.cimr.autophagy.criteria.PubChemCountActiveMolInAssay;
 import uk.ac.cam.cimr.autophagy.criteria.PubChemIC50uMolBelow;
@@ -17,43 +19,41 @@ import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
+ * This class is the CLI entry point to run a summary of PubChem BioAssays.
+ *
  * Created with IntelliJ IDEA.
  * User: pcm32
  * Date: 20/09/13
  * Time: 13:58
  * To change this template use File | Settings | File Templates.
  */
-public class RunPubChemAutophagyRet {
+public class RunPubChemBioAssaysSummary {
 
-    private static final Logger LOGGER = Logger.getLogger(RunPubChemAutophagyRet.class);
+    private static final Logger LOGGER = Logger.getLogger(RunPubChemBioAssaysSummary.class);
 
-    String query;
-    Integer testingLimit = 0;
     List<BioAssayBagWriter> writers;
     BioAssayFilter[] filters;
+    ScreenRetrieval ret;
 
-    public RunPubChemAutophagyRet(String query, BioAssayBagWriter... writers) {
-        this.query = query;
+    /**
+     * Class for setting up the run of a screen set retrieval and summary.
+     *
+     * @param ret the type of {@link ScreenRetrieval} to use.
+     * @param writers to be used to generate the output.
+     */
+    public RunPubChemBioAssaysSummary(ScreenRetrieval ret, BioAssayBagWriter... writers) {
+        this.ret = ret;
         this.writers = Arrays.asList(writers);
     }
 
-    public void setTestingLimit(Integer limit) {
-        testingLimit = limit;
-    }
-
     public void run() {
-        ScreenRetrieval ret = new ScreenRetrieval();
+        //TermQueryScreenRetrieval ret = new TermQueryScreenRetrieval();
         BioAssayScorer scorer = new SimpleDictionaryBasedAssayScorer(SimpleDictionaryBasedAssayScorer.class.getResourceAsStream("keywords.txt"));
-        if(testingLimit>0)
-            ret.setTestingLimit(testingLimit);
-        if(filters!=null && filters.length>0)
-            ret.setBioAssayFilters(filters);
-        BioAssayBag bag = ret.getAssaysForQuery(query);
+        BioAssayBag bag = ret.getAssays();
         LOGGER.info("Retrieved bag with "+bag.getAssays().size()+" assays");
         bag.addCriteria(new PubChemCountActiveMolInAssay(), new PubChemIC50uMolBelow(20.0f), new BioAssayKeywordScoreCriterion(scorer));
         BioAssayAnnotator annotator = new BioAssayAnnotator();
@@ -70,7 +70,19 @@ public class RunPubChemAutophagyRet {
 
 
     public static void main(String[] args) throws IOException {
-        String path = args[0];
+
+        CLIOptions options = new CLIOptions();
+        CmdLineParser parser = new CmdLineParser(options);
+        try {
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            parser.printUsage(System.err);
+            System.err.println();
+            throw new RuntimeException("Some problem with the arguments given.");
+        }
+
+
+        String path = options.getOuputPath();
         try {
             Files.createDirectory(FileSystems.getDefault().getPath(path));
         } catch (FileAlreadyExistsException e) {
@@ -80,23 +92,27 @@ public class RunPubChemAutophagyRet {
         BioAssayBagWriter bioAssaySummaryWriter = new BAssayBagAssaySummaryWriter(path);
         BioAssayBagWriter comp2AssayWriter = new Compound2BioAssayWriter(path);
 
-        RunPubChemAutophagyRet runner = new RunPubChemAutophagyRet("autophagy", highlyActiveCompoundsBioAssayBagWriter,
-                bioAssaySummaryWriter,
-                comp2AssayWriter);
-
+        ScreenRetrieval retrieval=null;
+        if(options.getQuery()!=null) {
+            retrieval = new TermQueryScreenRetrieval(options.getQuery());
+        } else if(options.getPathToListOfAIDs()!=null) {
+            retrieval = new ListScreenRetrieval(options.getPathToListOfAIDs());
+        } else {
+            System.err.println("Either -q for query or -p for path to a list of AIDs needs to be provided.");
+            parser.printUsage(System.err);
+            return;
+        }
         File blackList = new File(path + File.separator + "aid_blacklist.txt");
         if (blackList.exists()) {
             LOGGER.info("Using black list of identifiers in "+blackList.getAbsolutePath());
-            runner.setFilters(new BlackListBAFilter(blackList.getAbsolutePath()));
+            retrieval.setBioAssayFilters(new BlackListBAFilter(blackList.getAbsolutePath()));
         }
-        if (args.length > 1) {
-            runner.setTestingLimit(Integer.parseInt(args[1]));
+        if (options.getTestingLimit()!=null) {
+            retrieval.setTestingLimit(options.getTestingLimit());
         }
+        RunPubChemBioAssaysSummary runner = new RunPubChemBioAssaysSummary(retrieval, highlyActiveCompoundsBioAssayBagWriter,
+                bioAssaySummaryWriter,
+                comp2AssayWriter);
         runner.run();
-    }
-
-
-    public void setFilters(BioAssayFilter... filters) {
-        this.filters = filters;
     }
 }

@@ -11,7 +11,7 @@ import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
  * Time: 13:07
  * To change this template use File | Settings | File Templates.
  */
-public class ScreenRetrievalTest {
+public class TermQueryScreenRetrievalTest {
 
 
     /**
@@ -22,8 +22,8 @@ public class ScreenRetrievalTest {
      */
     @Test
     public void testGetAssaysForQuery1811() throws Exception {
-        ScreenRetrieval retrieval = new ScreenRetrieval();
-        BioAssayBag bag = retrieval.getAssaysForQuery("1811");
+        TermQueryScreenRetrieval retrieval = new TermQueryScreenRetrieval("1811");
+        BioAssayBag bag = retrieval.getAssays();
         BioAssayAnnotator annotator = new BioAssayAnnotator();
         annotator.annotate(bag);
 

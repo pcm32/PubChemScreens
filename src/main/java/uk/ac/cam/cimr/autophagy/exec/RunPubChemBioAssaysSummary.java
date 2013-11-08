@@ -23,21 +23,29 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * This class is the CLI entry point to run a summary of PubChem BioAssays.
+ *
  * Created with IntelliJ IDEA.
  * User: pcm32
  * Date: 20/09/13
  * Time: 13:58
  * To change this template use File | Settings | File Templates.
  */
-public class RunPubChemAutophagyRet {
+public class RunPubChemBioAssaysSummary {
 
-    private static final Logger LOGGER = Logger.getLogger(RunPubChemAutophagyRet.class);
+    private static final Logger LOGGER = Logger.getLogger(RunPubChemBioAssaysSummary.class);
 
     List<BioAssayBagWriter> writers;
     BioAssayFilter[] filters;
     ScreenRetrieval ret;
 
-    public RunPubChemAutophagyRet(ScreenRetrieval ret, BioAssayBagWriter... writers) {
+    /**
+     * Class for setting up the run of a screen set retrieval and summary.
+     *
+     * @param ret the type of {@link ScreenRetrieval} to use.
+     * @param writers to be used to generate the output.
+     */
+    public RunPubChemBioAssaysSummary(ScreenRetrieval ret, BioAssayBagWriter... writers) {
         this.ret = ret;
         this.writers = Arrays.asList(writers);
     }
@@ -102,14 +110,9 @@ public class RunPubChemAutophagyRet {
         if (options.getTestingLimit()!=null) {
             retrieval.setTestingLimit(options.getTestingLimit());
         }
-        RunPubChemAutophagyRet runner = new RunPubChemAutophagyRet(retrieval, highlyActiveCompoundsBioAssayBagWriter,
+        RunPubChemBioAssaysSummary runner = new RunPubChemBioAssaysSummary(retrieval, highlyActiveCompoundsBioAssayBagWriter,
                 bioAssaySummaryWriter,
                 comp2AssayWriter);
         runner.run();
-    }
-
-
-    public void setFilters(BioAssayFilter... filters) {
-        this.filters = filters;
     }
 }

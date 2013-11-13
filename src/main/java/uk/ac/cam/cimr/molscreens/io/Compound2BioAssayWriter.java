@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import uk.ac.cam.cimr.molscreens.criteria.Criterion;
 import uk.ac.cam.cimr.molscreens.criteria.MoleculeInAssayCriterion;
 import uk.ac.cam.cimr.molscreens.ws.BioAssayBag;
+import uk.ac.ebi.mdk.domain.identifier.PubChemBioAssayIdentifier;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTable;
 import uk.ac.ebi.metabolomes.webservices.pubchem.PChemBioAssayTableEntry;
 
@@ -28,9 +29,15 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
     private static final Logger LOGGER = Logger.getLogger(Compound2BioAssayWriter.class);
 
     String pathToFile;
+    Boolean forExcel = false;
 
     public Compound2BioAssayWriter(String path) {
         pathToFile = path + File.separator + "comp2Assay.txt";
+    }
+
+    public Compound2BioAssayWriter(String path, Boolean forExcel) {
+        this(path);
+        this.forExcel = forExcel;
     }
 
     @Override
@@ -44,9 +51,16 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
             }
             writer.write("\n");
 
+            ExcelHyperlinkMaker excelHyperlinkMaker = new ExcelHyperlinkMaker();
+            LinkMaker cidLinkMaker = new CIDLinkMaker();
+            LinkMaker sidLinkMaker = new SIDLinkMaker();
+            LinkMaker aidLinkMaker = new AIDLinkMaker();
+
             for (PChemBioAssayTable assay : bag.getAssays()) {
                 for (PChemBioAssayTableEntry entry : assay.getEntries()) {
-                    writer.write(entry.getCID()+"\t"+bag.getNameForCID(entry.getPChemCompoundIdentifier())+"\t"+assay.getID()+"\t"+assay.getName()+"\t"+assay.getDescription());
+                    writer.write(getCIDLabel(entry,excelHyperlinkMaker,cidLinkMaker)
+                            +"\t"+bag.getNameForCID(entry.getPChemCompoundIdentifier())
+                            +"\t"+getAssayLabel(assay,excelHyperlinkMaker,aidLinkMaker)+"\t"+assay.getName()+"\t"+assay.getDescription());
 
                     for (MoleculeInAssayCriterion criterion : suitableCriteria) {
                         Boolean outcome = bag.getCriteriaOutput(criterion, assay, entry.getPChemCompoundIdentifier());
@@ -61,6 +75,22 @@ public class Compound2BioAssayWriter implements BioAssayBagWriter {
             LOGGER.error("Could not write compounds file", e);
         }
 
+    }
+
+    private String getAssayLabel(PChemBioAssayTable assay, ExcelHyperlinkMaker excelHyperlinkMaker, LinkMaker aidLinkMaker) {
+        if(forExcel) {
+            return excelHyperlinkMaker.getHyperlink(new PubChemBioAssayIdentifier(assay.getID()),aidLinkMaker);
+        } else {
+            return assay.getID();
+        }
+    }
+
+    private String getCIDLabel(PChemBioAssayTableEntry entry, ExcelHyperlinkMaker excelHyperlinkMaker, LinkMaker linkMaker) {
+        if(forExcel) {
+            return excelHyperlinkMaker.getHyperlink(entry.getPChemCompoundIdentifier(),linkMaker);
+        } else {
+            return entry.getCID();
+        }
     }
 
     private Collection<MoleculeInAssayCriterion> filterCriteria(Collection<Criterion> criteria) {

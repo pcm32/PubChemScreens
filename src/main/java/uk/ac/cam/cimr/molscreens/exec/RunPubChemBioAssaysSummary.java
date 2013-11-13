@@ -94,11 +94,18 @@ public class RunPubChemBioAssaysSummary {
 
         ScreenRetrieval retrieval=null;
         if(options.getQuery()!=null && options.getPathToListOfAIDs()!=null) {
-            retrieval = new CombinedRetrieval(new TermQueryScreenRetrieval(options.getQuery()),
+            if(options.getQueryIsFilePath())
+                retrieval = new CombinedRetrieval(new TermQueryScreenRetrieval(new File(options.getQuery())),
+                        new ListScreenRetrieval(options.getPathToListOfAIDs()));
+            else
+                retrieval = new CombinedRetrieval(new TermQueryScreenRetrieval(options.getQuery()),
                     new ListScreenRetrieval(options.getPathToListOfAIDs()));
         }
         else if(options.getQuery()!=null) {
-            retrieval = new TermQueryScreenRetrieval(options.getQuery());
+            if(options.getQueryIsFilePath())
+                retrieval = new TermQueryScreenRetrieval(new File(options.getQuery()));
+            else
+                retrieval = new TermQueryScreenRetrieval(options.getQuery());
         } else if(options.getPathToListOfAIDs()!=null) {
             retrieval = new ListScreenRetrieval(options.getPathToListOfAIDs());
         } else {

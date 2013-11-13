@@ -1,6 +1,7 @@
 package uk.ac.cam.cimr.molscreens.exec;
 
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.BooleanOptionHandler;
 
 /**
  * This bean holds the options that the main CLI entry point can receive.
@@ -16,7 +17,7 @@ public class CLIOptions {
     @Option(name="-p",usage="Path to file with AIDs to use")
     private String pathToListOfAIDs;
 
-    @Option(name="-q",usage = "Query to be submitted to pubchem")
+    @Option(name="-q",usage = "Query to be submitted to pubchem, or file path to a file containing a query (use -f to indicate this)")
     private String query;
 
     @Option(name = "-o",
@@ -29,6 +30,17 @@ public class CLIOptions {
 
     @Option(name = "-b",usage = "Path to a list of AIDs that should be neglected if the appear in the retrieval steps.")
     private String pathToBlackList;
+
+    @Option(name="-f",handler=BooleanOptionHandler.class,usage = "Flag to indicate whether the string provided for -q is actually a file containing the query")
+    private Boolean queryIsFilePath = false;
+
+    /**
+     * True if the string provided for option -q is supposed to be a file path.
+     * @return
+     */
+    public Boolean getQueryIsFilePath() {
+        return queryIsFilePath;
+    }
 
     /**
      * Gets the path to a file with a list of PubChem BioAssay AIDs, one per line.

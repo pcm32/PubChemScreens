@@ -27,6 +27,9 @@ public class CLIOptions {
     @Option(name="-t",usage = "Integer for setting a limit of AIDs to use for testing purposes.")
     private Integer testingLimit;
 
+    @Option(name = "-b",usage = "Path to a list of AIDs that should be neglected if the appear in the retrieval steps.")
+    private String pathToBlackList;
+
     /**
      * Gets the path to a file with a list of PubChem BioAssay AIDs, one per line.
      *
@@ -62,5 +65,15 @@ public class CLIOptions {
      */
     public Integer getTestingLimit() {
         return testingLimit;
+    }
+
+    /**
+     * A black list is a file containing AIDs that we want to avoid, as they have been isolated as irrelevant results for
+     * some reason. The blacklist should just contain AIDs, one per line.
+     *
+     * @return
+     */
+    public String getPathToBlackList() {
+        return pathToBlackList;
     }
 }

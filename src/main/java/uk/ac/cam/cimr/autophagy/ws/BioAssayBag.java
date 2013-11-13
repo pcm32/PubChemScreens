@@ -70,11 +70,15 @@ public class BioAssayBag {
      */
     public List<PubChemCompoundIdentifier> getOrderedCIDs() {
         if(orderedCIDs==null) {
-            orderedCIDs = new ArrayList<PubChemCompoundIdentifier>(activeCIDs.elementSet().size());
-            orderedCIDs.addAll(activeCIDs.elementSet());
-            Collections.sort(orderedCIDs,new CompoundRanker(activeCIDs));
+            computeOrderedCIDs();
         }
         return orderedCIDs;
+    }
+
+    private void computeOrderedCIDs() {
+        orderedCIDs = new ArrayList<PubChemCompoundIdentifier>(activeCIDs.elementSet().size());
+        orderedCIDs.addAll(activeCIDs.elementSet());
+        Collections.sort(orderedCIDs, new CompoundRanker(activeCIDs));
     }
 
     public Integer getCIDActiveCount(PubChemCompoundIdentifier cid) {
@@ -131,6 +135,30 @@ public class BioAssayBag {
 
     public PubChemNamesResult getCompoundNames() {
         return compoundNames;
+    }
+
+    /**
+     * This method merges the given BioAssayBag into the current one. This doesn't transfer results calculated for the
+     * different criteria, so if used afther the {@link #compute()} method is called, then this method needs to be
+     * invoked again.
+     *
+     * @param assays the assays to be added.
+     */
+    public void addBioAssays(BioAssayBag assays) {
+        // add tables that don't exist
+        for (PChemBioAssayTable tableExternal : assays.getAssays()) {
+            if(!this.getAssays().contains(tableExternal)) {
+                this.addBioAssayTable(tableExternal);
+            }
+        }
+        // Ordered CIDs
+        computeOrderedCIDs();
+        // merge criteria
+        for (Criterion externalCrit : assays.getCriteria()) {
+            if(!this.getCriteria().contains(externalCrit)) {
+                this.criteria.add(externalCrit);
+            }
+        }
     }
 
     private class CompoundRanker implements Comparator<PubChemCompoundIdentifier> {

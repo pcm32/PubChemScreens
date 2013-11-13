@@ -93,7 +93,11 @@ public class RunPubChemBioAssaysSummary {
         BioAssayBagWriter comp2AssayWriter = new Compound2BioAssayWriter(path);
 
         ScreenRetrieval retrieval=null;
-        if(options.getQuery()!=null) {
+        if(options.getQuery()!=null && options.getPathToListOfAIDs()!=null) {
+            retrieval = new CombinedRetrieval(new TermQueryScreenRetrieval(options.getQuery()),
+                    new ListScreenRetrieval(options.getPathToListOfAIDs()));
+        }
+        else if(options.getQuery()!=null) {
             retrieval = new TermQueryScreenRetrieval(options.getQuery());
         } else if(options.getPathToListOfAIDs()!=null) {
             retrieval = new ListScreenRetrieval(options.getPathToListOfAIDs());
@@ -106,6 +110,9 @@ public class RunPubChemBioAssaysSummary {
         if (blackList.exists()) {
             LOGGER.info("Using black list of identifiers in "+blackList.getAbsolutePath());
             retrieval.setBioAssayFilters(new BlackListBAFilter(blackList.getAbsolutePath()));
+        } else if(options.getPathToBlackList()!=null) {
+            LOGGER.info("Using black list of identifiers in "+options.getPathToBlackList());
+            retrieval.setBioAssayFilters(new BlackListBAFilter(options.getPathToBlackList()));
         }
         if (options.getTestingLimit()!=null) {
             retrieval.setTestingLimit(options.getTestingLimit());
